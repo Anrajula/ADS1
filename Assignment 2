@@ -1,0 +1,159 @@
+
+##Access to electricity in 6 European countries compares to one developing country
+
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+def load_data_file(file_path,index_column):
+  data_frame = pd.read_csv(file_path,sep=",",index_col=index_column)
+  return data_frame
+
+"""Opening the file"""
+
+df = load_data_file('electricity.csv',"Country Name")
+
+df.head(8)
+
+"""Dropping rows with mising data"""
+
+dropped_data =[]
+for i in  df.index.values:
+
+      if i not in ('France','Spain','Portugal','Estonia','Romania','Belarus','Kenya'):
+
+        dropped_data.append(i)
+
+print(dropped_data)
+
+df.drop(dropped_data, inplace = True)
+
+df.head(8)
+
+"""Drop unwanted columns"""
+
+#create my selection years
+years = []
+for yr in range(2000,2022):
+  years.append(str(yr))
+
+
+datas = []
+for data,items in df.items():
+  if data not in years:
+    datas.append(data)
+
+df = df.drop(datas,axis=1)
+
+
+df.head(8)
+
+"""Line code for the distribution"""
+
+#get the Y-Values
+
+countries = ['France','Spain','Portugal','Estonia','Romania','Belarus','Kenya']
+
+y_dict = {}
+
+for c in countries:
+  y_dict[c] = []
+
+
+for i in years:
+  items = df[i].to_list()
+
+  for ctry in range(0,len(countries)):
+    y_dict[countries[ctry]].append(items[ctry])
+
+
+print(y_dict)
+
+"""Line plot"""
+
+x = years
+
+for i in y_dict:
+  plt.plot(x, y_dict.get(i), label=i)
+
+
+# Adding labels and title
+plt.xlabel('Years')
+plt.ylabel('% of access')
+plt.title('Access to electricity Across countries')
+
+# Adding a legend
+plt.legend()
+
+# Display the plot
+plt.show()
+
+"""Other distributions
+
+Comparison Btn the values in the oldest and new year
+"""
+
+yr2000 = []
+yr2021 = []
+
+for each in y_dict:
+  yr2000.append(y_dict[each][0])
+  yr2021.append(y_dict[each][-1])
+
+
+yvalues = yr2000
+countries = countries
+
+fig = plt.figure(figsize = (10, 5))
+
+# creating the bar plot
+plt.bar(countries, yvalues, color ='blue',
+        width = 0.4)
+
+plt.xlabel("Countries")
+plt.ylabel("% access to electricity")
+plt.title("% access to electricity")
+plt.show()
+
+"""pie chart for % access to electricity 2021"""
+
+#data to plot
+data = yr2021
+
+# Creating plot
+fig = plt.figure(figsize =(10, 7))
+plt.pie(data, labels = countries,)
+plt.title("% access to electricity")
+
+# show plot
+plt.show()
+
+"""Expload pie chart to highlight the difference"""
+
+fig, ax = plt.subplots(figsize=(6, 6))
+
+# Get four different grey colors.
+cmap = plt.get_cmap('Greys')
+colors = list(cmap(np.linspace(0.45, 0.85, len(x))))
+# Swap in a bright blue for the Lacrosse color.
+colors[4] = 'dodgerblue'
+
+
+
+patches, texts, pcts = ax.pie(
+    data, labels=countries, autopct='%.1f%%',
+    wedgeprops={'linewidth': 3.0, 'edgecolor': 'white'},
+    textprops={'size': 'x-large'},
+    startangle=90,
+    colors=colors,
+    # "Explode" the Lacrosse wedge to highlight it.
+    explode=(0, 0, 0, 0,0.1,0,0))
+
+for i, patch in enumerate(patches):
+
+  texts[i].set_color(patch.get_facecolor())
+plt.setp(pcts, color='white')
+plt.setp(texts, fontweight=600)
+ax.set_title('% access to electricity', fontsize=18)
+plt.tight_layout()
